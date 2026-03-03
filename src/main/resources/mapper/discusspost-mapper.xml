@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nowcoder.community.mapper.DiscussPostMapper">
+
+<!--  定义了一个叫 selectFields 的片段。  -->
+<!--  为了偷懒和规范。后面写 SQL 时，不用每次都把这 9 个字段写一遍，直接用 <include refid="selectFields"></include> 代替即可。  -->
+    <sql id="selectFields">
+        id, user_id, title, content, type, status, create_time, comment_count, score
+    </sql>
+
+<!--resultType 为返回的类对象  discuss_post 是数据库的表-->
+<!--    动态sql 动态判断逻辑  俩种情况 其中有种情况会加上 AND user_id = #{userId}  -->
+<!--    type 通常代表“置顶”。置顶帖（type=1）比普通帖（type=0）大，降序排列可以让置顶帖排在最前面。-->
+<!--    create_time desc：在置顶状态相同的情况下，按创建时间降序，即最新的帖子排在前面。-->
+<!--    limit #{offset}, #{limit} 从 offset 开始，取 limit 条记录。-->
+    <select id = "selectDiscussPosts" resultType = "DiscussPost">
+        select <include refid="selectFields"></include>
+        from discuss_post
+        where status != 2
+        <if test="userId!=0">
+            and user_id = #{userId}
+        </if>
+        order by type desc, create_time desc
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="selectDiscussPostRows" resultType="int">
+        select count(id)
+        from discuss_post
+        where status != 2
+        <if test="userId!=0">
+            and user_id = #{userId}
+        </if>
+    </select>
+
+</mapper>
