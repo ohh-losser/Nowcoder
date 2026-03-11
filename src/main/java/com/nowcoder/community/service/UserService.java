@@ -4,6 +4,7 @@ import com.nowcoder.community.entity.LoginTicket;
 import com.nowcoder.community.mapper.LoginTicketMapper;
 import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.util.CommunityUtil;
+import com.nowcoder.community.util.HostHolder;
 import org.apache.commons.lang3.StringUtils;
 import com.nowcoder.community.dao.UserMapper;
 
@@ -40,6 +41,8 @@ public class UserService implements CommunityConstant {
 
     @Value("${server.servlet.context-path}")
     private String contextPath;
+    @Autowired
+    private HostHolder hostHolder;
 
     public User findUserById(int id) {
         return userMapper.selectById(id);
@@ -177,6 +180,35 @@ public class UserService implements CommunityConstant {
 
     public LoginTicket findLoginTicket(String ticket) {
         return loginTicketMapper.selectByTicket(ticket);
+    }
+
+    public int updateHeader(int userId, String headerUrl) {
+        return userMapper.updateHeader (userId, headerUrl);
+    }
+
+    //更新密码
+    public Map<String, Object> updatePassword(int userId, String oldPassword, String newPassword) {
+        Map<String, Object> map = new HashMap<>();
+        User user = hostHolder.getUser();
+
+        // 验证旧密码是否正确 加密后对比
+        String oldPasswordMd5 = CommunityUtil.md5(oldPassword + user.getSalt());
+        if (!user.getPassword().equals(oldPasswordMd5)) {
+            map.put("oldPasswordMsg", "旧密码错误");
+            return map;
+        }
+
+        // 验证新密码是否为空
+        if (StringUtils.isBlank(newPassword)) {
+            map.put("newPasswordMsg", "新密码不能为空");
+            return map;
+        }
+
+        // 更新密码
+        user.setPassword(CommunityUtil.md5(newPassword + user.getSalt()));
+        userMapper.updatePassword(userId, user.getPassword());
+
+        return map;
     }
 
 }
