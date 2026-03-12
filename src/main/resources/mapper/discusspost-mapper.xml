@@ -10,6 +10,10 @@
         id, user_id, title, content, type, status, create_time, comment_count, score
     </sql>
 
+    <sql id="insertFields">
+        user_id, title, content, type, status, create_time, comment_count, score
+    </sql>
+
 <!--resultType 为返回的类对象  discuss_post 是数据库的表-->
 <!--    动态sql 动态判断逻辑  俩种情况 其中有种情况会加上 AND user_id = #{userId}  -->
 <!--    type 通常代表“置顶”。置顶帖（type=1）比普通帖（type=0）大，降序排列可以让置顶帖排在最前面。-->
@@ -34,5 +38,19 @@
             and user_id = #{userId}
         </if>
     </select>
+
+    <insert id="insertDiscussPost" parameterType="DiscussPost">
+        <!-- insert into discuss_post(user_id, title, content, type, status, create_time, comment_count, score) -->
+        insert into discuss_post(<include refid="insertFields"></include>)
+        values(#{userId}, #{title}, #{content}, #{type}, #{status}, #{createTime}, #{commentCount}, #{score})
+    </insert>
+
+    <select id="selectDiscussPostById" resultType="DiscussPost">
+        select <include refid="selectFields"></include>
+        from discuss_post
+        where id = #{id}
+    </select>
+
+
 
 </mapper>
