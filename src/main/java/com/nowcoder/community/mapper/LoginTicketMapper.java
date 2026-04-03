@@ -3,6 +3,7 @@ package com.nowcoder.community.mapper;
 import com.nowcoder.community.entity.LoginTicket;
 import org.apache.ibatis.annotations.*;
 
+@Deprecated
 @Mapper
 public interface LoginTicketMapper {
     // 插入登录凭证

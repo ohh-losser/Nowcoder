@@ -4,7 +4,9 @@ import com.nowcoder.community.entity.DiscussPost;
 import com.nowcoder.community.entity.Page;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.service.DiscussPostService;
+import com.nowcoder.community.service.LikeService;
 import com.nowcoder.community.service.UserService;
+import com.nowcoder.community.util.CommunityConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,13 +20,16 @@ import java.util.Map;
 
 //web层 表示这是一个处理 HTTP 请求的控制器。
 @Controller
-public class HomeController {
+public class HomeController implements CommunityConstant {
 
     @Autowired
     private DiscussPostService discussPostService;
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private LikeService likeService;
 
     //**作用**：建立请求 URL 和处理方法之间的映射关系。
     //**特点**：**默认匹配所有请求方式**。不管你是 GET、POST、PUT 还是 DELETE 发过来的请求，只要路径对，它全接。
@@ -56,6 +61,16 @@ public class HomeController {
                 map.put("post", post);
                 User user = userService.findUserById(post.getUserId());
                 map.put("user", user);
+
+                //赞
+                // 1. 确保 post 不为空，且 id 有效
+                if (post != null) {
+                    long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST, post.getId());
+                    map.put("likeCount", likeCount);
+                } else {
+                    map.put("likeCount", 0);
+                }
+
                 discussPosts.add(map);
             }
         }
